@@ -1,0 +1,71 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - deploy
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonar:
+    name: SonarCloud Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout completo (sin shallow clone para mejor análisis) ──
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ══════════════════════════════════════════
+      # BACKEND — Maven + JaCoCo
+      # ══════════════════════════════════════════
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build backend & generate JaCoCo coverage report
+        working-directory: sigchos-booking-backend
+        run: mvn verify -B --no-transfer-progress
+
+      # ══════════════════════════════════════════
+      # FRONTEND — Vitest + coverage (lcov)
+      # ══════════════════════════════════════════
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: sigchos-booking-frontend-avalon/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: sigchos-booking-frontend-avalon
+        run: npm ci
+
+      - name: Run frontend tests with coverage
+        working-directory: sigchos-booking-frontend-avalon
+        run: npm run test -- --coverage
+        env:
+          CI: true
+
+      # ══════════════════════════════════════════
+      # SONARCLOUD SCAN
+      # ══════════════════════════════════════════
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

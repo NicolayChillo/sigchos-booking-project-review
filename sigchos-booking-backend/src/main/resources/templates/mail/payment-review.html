@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body style="margin: 0; padding: 24px 12px; background-color: #f8fafc;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td align="center">
+                <table th:replace="~{mail/fragments/layout :: header(${senderName}, ${title}, ${subtitle})}"></table>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, Helvetica, sans-serif; max-width: 640px; margin: 0 auto; background-color: #ffffff; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+                    <tr>
+                        <td style="padding: 24px;">
+                            <p style="margin: 0 0 16px 0; font-size: 15px; color: #2d231e;">
+                                Hola <strong th:text="${greetingName}">cliente</strong>,
+                            </p>
+
+                            <p th:if="${approved}" style="margin: 0 0 12px 0; font-size: 14px; color: #5b4b42; line-height: 20px;">
+                                Hemos verificado tu pago por <strong th:text="${amount}">$0.00</strong>. Tu reserva ha sido confirmada.
+                            </p>
+
+                            <p th:if="${!approved}" style="margin: 0 0 12px 0; font-size: 14px; color: #5b4b42; line-height: 20px;">
+                                Lamentablemente tu pago por <strong th:text="${amount}">$0.00</strong> fue rechazado.
+                            </p>
+
+                            <p style="margin: 0 0 12px 0; font-size: 14px; color: #5b4b42; line-height: 20px;">
+                                Fechas: <span th:text="${bookingDates}">01/01/2024 - 02/01/2024</span>
+                            </p>
+
+                            <p th:if="${!approved and note != ''}" style="margin: 0 0 20px 0; font-size: 14px; color: #5b4b42; line-height: 20px;">
+                                Motivo: <strong th:text="${note}">Sin detalle</strong>
+                            </p>
+
+                            <p style="margin: 0; font-size: 12px; color: #835b49d5; line-height: 18px;">
+                                <span th:if="${approved}">Si tienes alguna duda, contacta con el establecimiento.</span>
+                                <span th:if="${!approved}">Puedes volver a enviar el comprobante o contactarnos para asistencia.</span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <table th:replace="~{mail/fragments/layout :: footer(${footer})}"></table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
